@@ -7,7 +7,9 @@ public class Application {
     public static final String ANNOUNCE = "경주할 자동차 이름(이름은 쉼표(,) 기준으로 구분)";
     public static final String ANNOUNCE_COUNT = "시도할 횟수";
     public static final String WINNER = "최종우승자: ";
+    public static final int GO = 4;
 
+    // 4이상일 경우만 전진하도록 다시 구현
     public static void main(String[] args) {
         System.out.println(ANNOUNCE);
 
@@ -15,24 +17,17 @@ public class Application {
         String[] splits = input.split(",");
 
         int countNum = count();
-        int num = countNum * splits.length;
-        int cipher = num;
 
-        Car [][] car = new Car[splits.length][countNum];
+        Car[] car = new Car[splits.length];
+        makeCar(splits, car);
+        go(splits, car, countNum);
+        String name = comparisonPosition(splits, car);
+        winner(name);
 
-        int [] positions = makeCar(countNum, splits, car, cipher);
-        int max = comparisonPosition(positions);
-        winner(splits, countNum, max, car);
     }
 
-    public static void winner(String[] splits, int countNum, int max, Car[][] car) {
-        for(int i=0; i< splits.length; i++) {
-            for (int j = 0; j < countNum; j++) {
-                if (car[i][j].getPosition() == max) {
-                    System.out.println(WINNER + car[i][j].getCarName());
-                }
-            }
-        }
+    public static void winner(String name) {
+        System.out.println(WINNER + name);
     }
 
     public static int count() {
@@ -41,15 +36,17 @@ public class Application {
         return count;
     }
 
-    public static String go(int randNumber) {
-        StringBuffer sb = new StringBuffer();
+    public static void go(String splits[], Car[] car, int count) {
 
-        if(randNumber >=4) {
-            for (int i = 0; i < randNumber; i++) {
-                sb.append("-");
+      for(int i=0;i<count; i++) {
+        for(int j=0; j<splits.length; j++) {
+            int randNumber = randNum();
+            if (randNumber >= GO) {
+                car[j].moveForward(randNumber);
             }
+            System.out.println(car[j].getCarName()+":" + car[i].print());
         }
-        return sb.toString();
+      }
     }
 
     public static int randNum() {
@@ -57,31 +54,21 @@ public class Application {
         return randNum;
     }
 
-    public static int[] makeCar(int count, String[] splits, Car[][] car, int cipher) {
-        int [] positions = new int[cipher];
-        int num;
-        for (int i = 0; i <= count; i++) {
-            num = 0;
-            for (String j : splits) {
-                int randNumber = randNum();
-                String go = go(randNumber);
-                car[i][num] = new Car(j, randNumber);
-                positions[i] = randNumber;
-                System.out.println(car[i][num].getCarName() + ":" + go + car[i][num].getPosition());
-                num++;
-            }
+    public static void makeCar(String[] splits, Car[] car) {
+
+        for (int i=0; i< splits.length; i++) {
+            car[i] = new Car(splits[i]);
         }
-        return positions;
     }
 
-    public static int comparisonPosition(int[] positions) {
-        int max = positions[0];
-
-        for (int i = 0; i < positions.length; i++) {
-                if (positions[i] > max) {
-                    max = positions[i];
-                }
+    public static String comparisonPosition(String[] splits, Car[] car) {
+        int max = car[0].getPosition();
+        String name = "";
+        for(int i=0; i<splits.length; i++) {
+            if(car[i].getPosition() > max) {
+                name = car[i].getCarName();
+            }
         }
-        return max;
+        return name;
     }
 }
