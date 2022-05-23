@@ -2,7 +2,9 @@ package racingcar;
 
 import camp.nextstep.edu.missionutils.Console;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Application {
     public static final String ANNOUNCE = "경주할 자동차 이름(이름은 쉼표(,) 기준으로 구분)";
@@ -13,27 +15,58 @@ public class Application {
     // 4이상일 경우만 전진하도록 다시 구현
     public static void main(String[] args) {
         System.out.println(ANNOUNCE);
+        List<String> splits = new ArrayList();
 
-        String input = String.valueOf(Console.readLine());
+        while(true) {
+            try {
+                String input = String.valueOf(Console.readLine());
+                String[] inputs = input.split(",");
 
-        if(input.getClass().getName() != "java.lang.String") {
-            throw new IllegalArgumentException("[ERROR] 문자열을 입력해주세요.");
+                for(String i : inputs)
+                {
+                    splits.add(i);
+                }
+
+                checkStringValidity(splits);
+                break;
+            } catch(IllegalArgumentException e) {
+                System.out.println("[ERROR] 이름은 5자이하로 입력해주세요.");
+            }
         }
-        String[] splits = input.split(",");
 
         int countNum = count();
 
-        Car[] car = new Car[splits.length];
-        makeCar(splits, car);
-        go(splits, car, countNum);
-        String[] names = comparisonPosition(splits, car);
+        System.out.println(splits.size());
+        List<Car> car = makeCar(splits);
+
+
+        go(car, countNum);
+        List<String> names = comparisonPosition(car);
         winner(names);
 
     }
 
-    public static void winner(String[] names) {
+    public static void checkStringValidity(List<String> splits) {
+        for(String name: splits) {
+            if (name.length() > 5) {
+                throw new IllegalArgumentException();
+            }
+        }
+    }
 
-        StringBuffer sb = new StringBuffer();
+    public static int checkNumberValidity() {
+        int count;
+        try {
+            count = Integer.parseInt(Console.readLine());
+        } catch (NumberFormatException ne) {
+            throw new IllegalArgumentException();
+        }
+        return count;
+    }
+
+    public static void winner(List<String> names) {
+
+        StringBuilder sb = new StringBuilder();
 
         for(String name : names) {
             if(name != null) {
@@ -41,40 +74,50 @@ public class Application {
                 sb.append(NEXT);
             }
         }
-        System.out.println(WINNER + sb);
+        sb.deleteCharAt(sb.lastIndexOf(","));
+        System.out.println(WINNER + sb.toString());
     }
 
     public static int count() {
         System.out.println(ANNOUNCE_COUNT);
-        int count = Integer.parseInt(Console.readLine());
-
-      return count;
+        int count = 0;
+        while (true) {
+            try {
+                count = checkNumberValidity();
+            } catch (IllegalArgumentException e) {
+                System.out.println("[ERROR] 숫자를 입력해주세요.");
+            }
+            return count;
+        }
     }
 
-    public static void go(String splits[], Car[] car, int count) {
+    public static void go(List<Car> car, int count) {
 
       for(int i=0;i<count; i++) {
-        for(int j=0; j<splits.length; j++) {
-            car[j].moveForward();
-            System.out.println(car[j].getCarName()+":" + car[j].print());
+        for(int j=0; j<car.size(); j++) {
+            car.get(j).moveForward();
+            System.out.println(car.get(j).getCarName()+":" + car.get(j).print());
         }
       }
     }
 
-    public static void makeCar(String[] splits, Car[] car) {
-
-        for (int i=0; i< splits.length; i++) {
-            car[i] = new Car(splits[i]);
+    public static List<Car> makeCar(List<String> splits) {
+        List<Car> cars = new ArrayList<>();
+        for (int i=0; i< splits.size(); i++) {
+            Car car = new Car(splits.get(i));
+            cars.add(car);
         }
+        return cars;
     }
 
-    public static String[] comparisonPosition(String[] splits, Car[] car) {
-        int max = car[0].getPosition();
-        String[] names = new String[splits.length];
-        int k = 0;
-        for(int i=0; i<splits.length;i++) {
-            if(car[i].getPosition() > max) {
-                names[k] = car[i].getCarName();
+    public static List<String> comparisonPosition(List<Car> car) {
+        List<String> names = new ArrayList<>();
+        int max = car.get(0).getPosition();
+
+        int k=0;
+        for(int i=0; i<car.size();i++) {
+            if(car.get(i).getPosition() > max) {
+                names.add(k, car.get(i).getCarName());
                 k++;
             }
         }
