@@ -21,11 +21,7 @@ public class Application {
             try {
                 String input = String.valueOf(Console.readLine());
                 String[] inputs = input.split(",");
-
-                for(String i : inputs)
-                {
-                    splits.add(i);
-                }
+                splits = Arrays.asList(inputs);
 
                 checkStringValidity(splits);
                 break;
